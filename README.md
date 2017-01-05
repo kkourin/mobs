@@ -1,2 +1,4 @@
 # mobs
-Code for project. I'll clean it up soon.
+Code for project. I'll clean up the code and write documentation soon.
+
+Requires boost library
