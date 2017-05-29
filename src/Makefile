@@ -44,7 +44,7 @@ localsearch.o:		localsearch.h instance.h pivotresult.h searchresult.h population
 pivotresult.o:		ordering.h types.h
 searchresult.o: 	searchresult.h types.h
 population.o :		ordering.h instance.h localsearch.h types.h
-resultregister.o:	types.h
+resultregister.o:	types.h searchresult.h ordering.h
 util.o:			types.h
 tabulist.o: 		tabulist.h ordering.h
 movetabulist.o: 	movetabulist.h ordering.h

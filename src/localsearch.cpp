@@ -311,7 +311,7 @@ SearchResult LocalSearch::kollerSearch(Ordering &o, int listSize, float timeLimi
       curScore += bestDelta;
       stl.add(current.get(bestSwap), current.get(bestSwap + 1));
       if (curScore < bestSeenOrderingScore) {
-        rr.record(curScore);
+        rr.record(curScore, current);
         bestSeenOrderingScore = curScore;
         bestSeenOrdering = current;
       }
@@ -691,7 +691,7 @@ SearchResult LocalSearch::hillClimb(const Ordering &ordering, float timeLimit, R
       }
     }
     DBG("Cur Score: " << curScore);
-    rr.record(curScore);
+    rr.record(curScore, cur);
   } while(improving && (rr.check() <= timeLimit));
   DBG("Total Steps: " << steps);
   return SearchResult(curScore, cur);
@@ -765,7 +765,7 @@ SearchResult LocalSearch::hillClimbingWithNRestarts(int numRestarts, ResultRegis
     Ordering o = Ordering::greedyOrdering(instance);
     SearchResult cur = hillClimb(o);
     if (cur.getScore() < best.getScore()) {
-      rr.record(cur.getScore());
+      rr.record(cur.getScore(), cur.getOrdering());
       best = cur;
     }
   }
@@ -805,7 +805,7 @@ SearchResult LocalSearch::ILS(const Ordering &ordering, int MAX_PERTURBS, int IM
       timeSinceLastImprovement += 1;
     }
     if (climbed.getScore() < rr.getBest()) {
-      rr.record(climbed.getScore());
+      rr.record(climbed.getScore(), climbed.getOrdering());
     }
     if (rr.check() > timeLimit || Util::isOpt(s, opt)) {
       return s;
@@ -886,8 +886,8 @@ SearchResult LocalSearch::genetic(float cutoffTime, int INIT_POPULATION_SIZE, in
   SearchResult best(Types::SCORE_MAX, Ordering(n));
   std::deque<Types::Score> fitnesses;
   Population population(*this);
-  rr.set();
-  int numGenerations = 0;
+  int numGenerations = 1;
+  std::cout << "Time: " << rr.check() << " Generating initial population" << std::endl;
   for (int i = 0; i < INIT_POPULATION_SIZE; i++) {
     if (greediness == -1) {
       population.addSpecimen(hillClimb(Ordering::randomOrdering(instance)));
@@ -895,7 +895,9 @@ SearchResult LocalSearch::genetic(float cutoffTime, int INIT_POPULATION_SIZE, in
       population.addSpecimen(hillClimb(Ordering::greedyOrdering(instance, greediness)));
     }
   }
+  std::cout << "Done generating initial population" << std::endl;
   do {
+    std::cout << "Time: " << rr.check() << " Starting generation " << numGenerations << std::endl;
     //DBG(population);
     std::vector<SearchResult> offspring;
     population.addCrossovers(NUM_CROSSOVERS, crossoverType, offspring);
@@ -919,12 +921,14 @@ SearchResult LocalSearch::genetic(float cutoffTime, int INIT_POPULATION_SIZE, in
     }
     DBG("Fitness: " << population.getAverageFitness());
     SearchResult curBest = population.getSpecimen(0);
-    if (curBest.getScore() < best.getScore()) {
-      rr.record(curBest.getScore());
+    Types::Score curScore = curBest.getScore();
+    std::cout << "Time: " << rr.check() <<  " The best soore at this iteration is: " << curScore << std::endl;
+    if (curScore < best.getScore()) {
+      rr.record(curBest.getScore(), curBest.getOrdering());
       best = curBest;
     }
     numGenerations++;
-  } while (!Util::isOpt(best, opt) && rr.check() < cutoffTime);
+  } while (rr.check() < cutoffTime);
   std::cout << "Generations: " << numGenerations << std::endl;
   return best;
 }
@@ -995,7 +999,7 @@ SearchResult LocalSearch::hillClimbOldHybridImprove(Ordering ordering, float cut
       }
     }
     DBG("Cur Score: " << curScore);
-    rr.record(curScore);
+    rr.record(curScore, cur);
   } while(improving && (rr.check() <= cutoffTime));
   DBG("Total Steps: " << steps);
   return SearchResult(curScore, cur);
@@ -1174,7 +1178,7 @@ SearchResult LocalSearch::hillClimbFirstImproveV2(Ordering ordering, float cutof
       }
     }
     DBG("Cur Score: " << curScore);
-    rr.record(curScore);
+    rr.record(curScore, cur);
   } while(improving && (rr.check() <= cutoffTime));
   DBG("Total Steps: " << steps);
   return SearchResult(curScore, cur);
@@ -1205,7 +1209,7 @@ SearchResult LocalSearch::hillClimbWithRestartsProbe(SelectType type, int numRun
      } else if (type == SelectType::OLDHYBRID) {
        cur = hillClimbOldHybridImprove(o, cutoffTime, rr);
      }
-     rr.record(cur.getScore());
+     rr.record(cur.getScore(), cur.getOrdering());
      if (cur.getScore() < best.getScore()) {
        best = cur;
      }
