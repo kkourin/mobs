@@ -6,6 +6,7 @@
 #include "types.h"
 class Ordering {
   public:
+    Ordering() {}
     Ordering(int size);
     void set(const int &index, const int &num);
     int get(const int &index) const;

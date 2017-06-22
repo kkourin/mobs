@@ -12,7 +12,6 @@ void ResultRegister::record(Types::Score score, const Ordering &o) {
   struct timeval tp;
   gettimeofday(&tp, NULL);
   long int curMill = tp.tv_sec * 1000 + tp.tv_usec / 1000;
-  scores.push_back(std::make_pair(curMill - origin, score));
   if (score < bestScore) {
     bestScore = score;
     bestScores.push_back(std::make_pair(curMill - origin, score));
@@ -65,10 +64,6 @@ void ResultRegister::dump(const std::string &outFile, const std::string &instanc
 
 
 void ResultRegister::write(std::ofstream &os) {
-  int n = scores.size();
-  for (int i = 0; i < n; i++) {
-    os << scores[i].first << " " << scores[i].second << std::endl;
-  }
   os << "BEST" << std::endl;
   os << "Time (ms)\tScore, followed by ordering next line" << std::endl;
   int nBest = bestScores.size();

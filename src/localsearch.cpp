@@ -889,11 +889,14 @@ SearchResult LocalSearch::genetic(float cutoffTime, int INIT_POPULATION_SIZE, in
   int numGenerations = 1;
   std::cout << "Time: " << rr.check() << " Generating initial population" << std::endl;
   for (int i = 0; i < INIT_POPULATION_SIZE; i++) {
+    SearchResult o;
     if (greediness == -1) {
-      population.addSpecimen(hillClimb(Ordering::randomOrdering(instance)));
+      o = hillClimb(Ordering::randomOrdering(instance));
     } else {
-      population.addSpecimen(hillClimb(Ordering::greedyOrdering(instance, greediness)));
+      o = hillClimb(Ordering::greedyOrdering(instance, greediness));
     }
+    rr.record(o.getScore(), o.getOrdering());
+    population.addSpecimen(o);
   }
   std::cout << "Done generating initial population" << std::endl;
   do {
@@ -922,7 +925,7 @@ SearchResult LocalSearch::genetic(float cutoffTime, int INIT_POPULATION_SIZE, in
     DBG("Fitness: " << population.getAverageFitness());
     SearchResult curBest = population.getSpecimen(0);
     Types::Score curScore = curBest.getScore();
-    std::cout << "Time: " << rr.check() <<  " The best soore at this iteration is: " << curScore << std::endl;
+    std::cout << "Time: " << rr.check() <<  " The best score at this iteration is: " << curScore << std::endl;
     if (curScore < best.getScore()) {
       rr.record(curBest.getScore(), curBest.getOrdering());
       best = curBest;

@@ -6,6 +6,7 @@
 
 class SearchResult {
   public:
+    SearchResult() {}
     SearchResult(Types::Score score, Ordering ordering);
     friend std::ostream& operator<<(std::ostream &os, const SearchResult& sr);
     Types::Score getScore() const;
